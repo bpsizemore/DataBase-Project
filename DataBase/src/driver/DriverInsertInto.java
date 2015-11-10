@@ -7,11 +7,11 @@ import adt.HashTable;
 import adt.Response;
 import adt.TableList;
 
-public class DriverInsertSomeInto {
+public class DriverInsertInto implements Driver{
 
 	private TableList<HashTable> tables;
 	private final Pattern pattern;
-	public DriverInsertSomeInto(TableList<HashTable> tables2) {
+	public DriverInsertInto(TableList<HashTable> tables2) {
 		this.tables = tables2;
 		pattern = Pattern.compile(
 				"",
@@ -27,35 +27,46 @@ public class DriverInsertSomeInto {
 		}
 		else {
 			
-			//if matches it should
+			//get tableName and verify existence
+			tableName = matcher.group(1); //get tableName
+			if (tables.get(tableName) == null) { //if tableName does not exist.
+				return false;
+			}
 			
+			//get data to insert
+			columnData = matcher.group(2).split(","); //get the matching group of all the column names
+			for (int i=0;i<columnData.length;i++) { 
+				columnData[i] = columnData[i].trim(); // remove whitespace in front and behind the column names 
+			}
 			
-			// generate an array of values for each column, find out if it needs to be the right length or if i need to isnert blanks to anywhere that isn't the right length.
-			// generate a list of the columns names.
-			// primary key must be included in column names
-			//column names may NOT be repeated
-			// they may be in any order
-			// reorder the column_values so that they are in proper order, with blank items in columns that weren't specified.
-			
-			//grab the tableName to insert into
-			// verify that the table exists.
-			// 
+			//check length of data vs num columns in table
+			if (tables.get(tableName).columns().length != columnData.length) {
+				return false;
+			}
 			
 			return true;
 		}
 	}
-	private String[] data;
+	private String[] columnData;
 	private String tableName;
-	private int numColumns;
 	
 	@Override
 	public Response execute() {
 	
 		// check to see if the primary key already exists in the table if exists this will fail
+		if (tables.get(tableName).retrieve(columnData[0]) != null) {
+			return new Response(false, "0 rows were inserted into "+tableName+" because the primary key already exists within the database.");
+		} else {
+			
+			String columns[][] = new String[1][1];
+			columns[0] = columnData;
+			tables.get(tableName).insert(columnData);
+			return new Response(true,"1 row was inserted into "+tableName,tables.get(tableName).columns(),columns);
+		}
 		
 		// insert the data into the table
 		
-		// make sure that the insert was succesfull, if not print off a failed insert response.
+		// make sure that the insert was successful, if not print off a failed insert response.
 	
 	}
 }

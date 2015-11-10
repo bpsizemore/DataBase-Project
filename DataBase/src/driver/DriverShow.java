@@ -1,7 +1,6 @@
 package driver;
 
 import java.util.regex.Matcher;
-import java.util.ArrayList;
 import java.util.regex.*;
 
 import adt.HashTable;
