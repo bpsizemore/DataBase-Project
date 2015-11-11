@@ -14,7 +14,7 @@ public class DriverInsertSomeInto implements Driver {
 	public DriverInsertSomeInto(TableList<HashTable> tables2) {
 		this.tables = tables2;
 		pattern = Pattern.compile(
-				"",
+				"\\s*INSERT\\s+INTO\\s+([a-z][a-z0-9_]*)\\s+\\(\\s*((?:[a-zA-Z][a-zA-Z0-9_]*)+\\s*(?:[a-zA-Z][\\w_]*\\s*[,]\\s*)*(?:[a-zA-Z][\\w_]*))\\s*\\)\\s*VALUES\\s*\\(\\s*((?:"[a-zA-z][\\w_ ]*"[,]{0,1})+\\s*)+\\s*\\);",
 			Pattern.CASE_INSENSITIVE
 		);
 	}
