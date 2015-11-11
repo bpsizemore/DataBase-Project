@@ -49,8 +49,35 @@ public class DriverSelectColumns implements Driver{
 			String rawRows[][] = tables.get(tableName).retrieve(filter);
 			
 			//for other select method, get only the columns we want.
-			
-			
+	
+			/*
+			 * In the order clause you can split by ,
+			 * after splitting by comma, start with the last one and check to see if it contains ASC DESC or nothing and sort appropriately.
+			 * move one by one until you've sorted by each thing specified in the order clause
+			 * 
+			 */
+			String[] columnMatches = matcher.group(3).split(","); //get the matching group of all the column names
+			for (int i=0;i<columnMatches.length;i++) { 
+				columnMatches[i] = columnMatches[i].trim(); // remove whitespace in front and behind the column names 
+			}
+			int num[];
+			String sort[];
+			for (int i=columnMatches.length-1;i >=0;i--) {
+				sort = columnMatches[i].split(" ");
+				
+				for (int x=0; x<tables.get(tableName).columns().length;x++) {
+					if (sort[0].equals(tables.get(tableName).columns()[x])) {
+						num = new int[] {x};
+						if (sort.length == 1) {
+							sortAsc(rawRows,num);
+						} else if (sort[1].equalsIgnoreCase("desc")) {
+							sortDesc(rawRows,num);
+						} else {
+							sortAsc(rawRows,num);
+						}
+					}
+				}
+			}
 			
 			
 			//do the order things
@@ -60,10 +87,11 @@ public class DriverSelectColumns implements Driver{
 				wantedColumns[i] = wantedColumns[i].trim(); // remove whitespace in front and behind the column names 
 			}
 			
+			//sort before separating the columns. That way if the user requests a sort by columns that aren't necessarily being outputted it will still function correctly. 
+			
 			columns = new String[wantedColumns.length - 1];
 			int r = 0;
 			for (int i=0; i <= wantedColumns.length-1;i++) {
-				int columnNumber;
 				for (int x=0; x<= tables.get(tableName).columns().length;x++) {
 					if (wantedColumns[i].equals(tables.get(tableName).columns()[x])) {
 						for (int y=0; y<= rawRows.length-1; y++) {
@@ -74,17 +102,7 @@ public class DriverSelectColumns implements Driver{
 				}
 			}
 			
-			/*
-			 * In the order clause you can split by ,
-			 * after splitting by comma, start with the last one and check to see if it contains ASC DESC or nothing and sort appropriately.
-			 * move one by one until you've sorted by each thing specified in the order clause
-			 * 
-			 */
-			String[] columnMatches = matcher.group(3).split(","); //get the mathcing group of all the column names
-			for (int i=0;i<columnMatches.length;i++) { 
-				columnMatches[i] = columnMatches[i].trim(); // remove whitespace in front and behind the column names 
-			}
-			
+
 			
 			return true;
 		}
@@ -95,22 +113,71 @@ public class DriverSelectColumns implements Driver{
 	
 	@Override
 	public Response execute() {
-	
-		// check to see if the primary key already exists in the table if exists this will fail
-		if () {
 		
-			return new Response(false, "0 rows were inserted into "+tableName+" because the primary key already exists within the database.");
-		
-		} else {
-
 			return new Response(true,tables.get(tableName).columns(),rows);
-		}
-		
-		// insert the data into the table
-		
-		// make sure that the insert was successful, if not print off a failed insert response.
-	
+
 	}
 	
-	
+	public static String[][] sortAsc(String data[][], int sortBy[]) {
+		boolean inMySpot = false;
+		String moving[];
+		if (sortBy.length > data[0].length) {
+			//it's fucked throw an error
+		}
+		else {
+			for (int i=0; i < sortBy.length;i++) { //this loop is the entire sort one for each column
+				
+				for (int x=0; x< data.length;x++) {
+					int y=x; //use this instead of x and decrement each loop.
+					while (!inMySpot) {
+						if (y-1 < 0) {
+							inMySpot = true;
+						} else if (data[y][sortBy[i]].compareTo(data[y-1][sortBy[i]]) <= 0) {
+							inMySpot = true;
+						}
+						else {
+							moving = data[y];
+							data[y] = data[y-1];
+							data[y-1] = moving;
+						}
+						y-=1;
+					}
+					inMySpot = false;
+				}
+			}
+		}
+		return data;
+	}
+
+	public static String[][] sortDesc(String data[][], int sortBy[]) {
+		boolean inMySpot = false;
+		String moving[];
+		if (sortBy.length > data[0].length) {
+			//it's fucked throw an error
+		}
+		else {
+			for (int i=0; i < sortBy.length;i++) { //this loop is the entire sort one for each column
+				
+				for (int x=0; x< data.length;x++) {
+					int y=x; //use this instead of x and decrement each loop.
+					while (!inMySpot) {
+						if (y-1 < 0) {
+							inMySpot = true;
+						} else if (data[y-1][sortBy[i]].compareTo(data[y][sortBy[i]]) <= 0) {
+							inMySpot = true;
+						}
+						else {
+							moving = data[y];
+							data[y] = data[y-1];
+							data[y-1] = moving;
+						}
+						y-=1;
+					}
+					inMySpot = false;
+				}
+			}
+		}
+		return data;
+	}
+				
 }
