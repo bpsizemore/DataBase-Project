@@ -45,7 +45,20 @@ public class VolatileServer implements Server {
 			
 			else if (ShowTables.valid(scripts[i])) {
 				Responses[i] = ShowTables.execute();
+			}
+			if (InsertInto.valid(scripts[i])) {
+				Responses[i] = CreateTable.execute();
+			}
+			else if(InsertSomeInto.valid(scripts[i])) {
+				Responses[i] = DropTable.execute();
+			}
+			
+			else if (SelectColumns.valid(scripts[i])) {
+				Responses[i] = ShowTables.execute();
 			}		
+			else if (SelectStar.valid(scripts[i])) {
+				Responses[i] = ShowTables.execute();
+			}
 			else {
 					Responses[i] = new Response(false, "Invalid query: " + scripts[i]);
 			}
